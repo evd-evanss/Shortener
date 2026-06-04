@@ -1,0 +1,9 @@
+appId: com.nubank.shortener
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Nu Shortener"
+    timeout: 5000
+- tapOn: "Encurtar"
+- assertVisible: "Digite uma URL para encurtar."

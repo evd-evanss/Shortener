@@ -1,0 +1,21 @@
+<resources>
+    <string name="shortener_splash_brand">nu</string>
+    <string name="shortener_splash_title">Shortener</string>
+    <string name="shortener_title">Nu Shortener</string>
+    <string name="shortener_subtitle">Cole uma URL longa, gere um link curto e copie para compartilhar.</string>
+    <string name="shortener_submit">Encurtar</string>
+    <string name="shortener_helper">Digite uma url para encurtar</string>
+    <string name="shortener_recent_title">Links encurtados recentemente</string>
+    <string name="shortener_empty_history">Nenhum link encurtado ainda.</string>
+    <string name="shortener_generated_link_title">Alias gerado</string>
+    <string name="shortener_api_link_label">Url encurtada</string>
+    <string name="shortener_original_url_label">URL original</string>
+    <string name="shortener_copy_action">Copiar</string>
+    <string name="shortener_open_action">Abrir URL</string>
+    <string name="shortener_success_message">Link encurtado com sucesso.</string>
+    <string name="shortener_blank_url_message">Digite uma URL para encurtar.</string>
+    <string name="shortener_invalid_url_message">URL inválida. Tente algo como nubank.com.br.</string>
+    <string name="shortener_service_unavailable_message">Não foi possível encurtar agora. Verifique sua conexão ou tente novamente em instantes.</string>
+    <string name="shortener_unknown_error_message">Não foi possível encurtar a URL agora. Tente novamente.</string>
+    <string name="shortener_preview_url">https://www.nubank.com.br</string>
+</resources>

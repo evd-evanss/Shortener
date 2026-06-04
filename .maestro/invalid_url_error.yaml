@@ -1,0 +1,11 @@
+appId: com.nubank.shortener
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Nu Shortener"
+    timeout: 5000
+- tapOn: "https://nubank.com.br"
+- inputText: "just words"
+- tapOn: "Encurtar"
+- assertVisible: "URL inválida. Tente algo como nubank.com.br."
