@@ -23,10 +23,6 @@ class ShortenerViewModel(
     private val _state = MutableStateFlow(ShortenerUiState())
     val state: StateFlow<ShortenerUiState> = _state.asStateFlow()
 
-    fun dismissSplash() {
-        _state.update { it.copy(showSplash = false) }
-    }
-
     fun onUrlChanged(value: String) {
         _state.update { current ->
             current.copy(url = value, message = null)

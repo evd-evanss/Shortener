@@ -1,4 +1,4 @@
-package com.nubank.shortener.feature.shortener.presentation.screen
+package com.nubank.shortener.feature.splash
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -29,15 +29,14 @@ import com.nubank.shortener.designsystem.component.NuText
 import com.nubank.shortener.designsystem.component.NuTextStyle
 import com.nubank.shortener.designsystem.theme.NuColors
 import com.nubank.shortener.designsystem.theme.NuTheme
-import com.nubank.shortener.feature.shortener.presentation.R
 
 @Composable
-internal fun NuSplashScreen(
+internal fun SplashScreen(
     title: String,
     modifier: Modifier = Modifier,
     brand: String? = null,
 ) {
-    val resolvedBrand = brand ?: stringResource(R.string.shortener_splash_brand)
+    val resolvedBrand = brand ?: stringResource(R.string.splash_brand)
     val transition = rememberInfiniteTransition(label = "nu-splash")
     val scale by transition.animateFloat(
         initialValue = 0.92f,
@@ -85,10 +84,10 @@ internal fun NuSplashScreen(
     }
 }
 
-@Preview(name = "NuSplash", widthDp = 360, heightDp = 640)
+@Preview(name = "Splash", widthDp = 360, heightDp = 640)
 @Composable
-private fun NuSplashPreview() {
+private fun SplashPreview() {
     NuTheme {
-        NuSplashScreen(title = stringResource(R.string.shortener_splash_title))
+        SplashScreen(title = stringResource(R.string.splash_title))
     }
 }

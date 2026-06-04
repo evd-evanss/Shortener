@@ -37,6 +37,7 @@ android {
 
 dependencies {
     implementation(project(":designsystem"))
+    implementation(project(":navigation"))
     implementation(project(":observability"))
     implementation(project(":network"))
     implementation(project(":feature:shortener:presentation"))

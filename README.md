@@ -36,9 +36,11 @@ O projeto usa Single Activity, Jetpack Compose, Koin, Ktor e modulos separados p
 
 ```text
 :app
+:navigation
 :designsystem
 :observability
 :network
+:feature:splash
 :feature:shortener:domain
 :feature:shortener:data
 :feature:shortener:presentation
@@ -46,7 +48,7 @@ O projeto usa Single Activity, Jetpack Compose, Koin, Ktor e modulos separados p
 
 Hoje a divisao e:
 
-- modulos Android: `:app`, `:designsystem`, `:feature:shortener:presentation`;
+- modulos Android: `:app`, `:navigation`, `:designsystem`, `:feature:splash`, `:feature:shortener:presentation`;
 - modulos Kotlin puros: `:observability`, `:network`, `:feature:shortener:domain`, `:feature:shortener:data`.
 
 Isso ajuda a manter regra, dados, rede e tela separados.
@@ -63,7 +65,34 @@ Responsavel por:
 - aplicar o tema;
 - iniciar o Koin;
 - configurar o Sentry quando existir DSN;
-- chamar a feature principal.
+- chamar o `NuNavHost`.
+
+### `:navigation`
+
+Grafo de navegacao do app.
+
+Responsavel por:
+
+- definir as rotas principais;
+- iniciar pela splash;
+- navegar da splash para o encurtador;
+- manter o `app` sem chamar telas de feature diretamente.
+
+Hoje ele registra:
+
+- `splash`;
+- `shortener`.
+
+### `:feature:splash`
+
+Feature da splash.
+
+Aqui ficam:
+
+- tela roxa de abertura;
+- textos da splash;
+- tempo de exibicao;
+- callback para avisar que a navegacao pode continuar.
 
 ### `:feature:shortener:presentation`
 
@@ -72,7 +101,6 @@ Parte visual e estado da tela.
 Aqui ficam:
 
 - tela em Compose;
-- splash roxa;
 - `ShortenerViewModel`;
 - estado da tela com `StateFlow`;
 - mensagens que aparecem para o usuario;
@@ -152,13 +180,16 @@ A inicializacao Android do Sentry fica no `:app`. O DSN entra por `local.propert
 ## Fluxo
 
 ```text
-Tela
-  -> ViewModel
-  -> UseCase
-  -> Repository
-  -> RemoteDataSource
-  -> Network
-  -> API
+App
+  -> Navigation
+  -> Splash
+  -> Shortener
+      -> ViewModel
+      -> UseCase
+      -> Repository
+      -> RemoteDataSource
+      -> Network
+      -> API
 ```
 
 Quando volta:
@@ -180,6 +211,7 @@ URL invalida
 ## Bibliotecas
 
 - Jetpack Compose: telas.
+- Navigation Compose: navegacao entre features.
 - Material 3: base visual.
 - Koin: injecao de dependencias e ViewModel.
 - Ktor: chamadas HTTP.
@@ -265,7 +297,6 @@ Usa Turbine para observar o `StateFlow`.
 
 Cobre:
 
-- splash sendo escondida;
 - sucesso ao encurtar, com loading, historico e mensagem;
 - falha do repository mostrando mensagem de indisponibilidade;
 - URL invalida sem chamar repository;
@@ -372,6 +403,8 @@ Rodar lint:
 - Componentes visuais compartilhados ficam no `:designsystem`.
 - Configuracao de rede fica no `:network`.
 - Logs e Sentry ficam no `:observability`.
+- Navegacao principal fica no `:navigation`.
+- Splash fica no `:feature:splash`.
 - Regras ficam no `:feature:shortener:domain`.
 - Dados ficam no `:feature:shortener:data`.
 - Tela e estado ficam no `:feature:shortener:presentation`.

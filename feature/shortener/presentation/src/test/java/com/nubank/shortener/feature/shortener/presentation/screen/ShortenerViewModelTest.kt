@@ -28,23 +28,6 @@ class ShortenerViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     @Test
-    fun `given splash visible when dismissSplash then hides splash`() = runTest(mainDispatcherRule.testDispatcher) {
-        // Given
-        val viewModel = createViewModel()
-
-        viewModel.state.test {
-            assertTrue(awaitItem().showSplash)
-
-            // When
-            viewModel.dismissSplash()
-
-            // Then
-            assertFalse(awaitItem().showSplash)
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
     fun `given valid url when shorten succeeds then adds url to history and shows success message`() =
         runTest(mainDispatcherRule.testDispatcher) {
             // Given

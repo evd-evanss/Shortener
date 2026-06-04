@@ -1,6 +1,4 @@
 <resources>
-    <string name="shortener_splash_brand">nu</string>
-    <string name="shortener_splash_title">Shortener</string>
     <string name="shortener_title">Nu Shortener</string>
     <string name="shortener_subtitle">Cole uma URL longa, gere um link curto e copie para compartilhar.</string>
     <string name="shortener_submit">Encurtar</string>
