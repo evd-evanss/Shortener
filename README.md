@@ -28,6 +28,68 @@ O que e curto no retorno e o alias:
 
 No app, o botao **Abrir URL** abre a URL original que ja veio na resposta do encurtamento.
 
+## Como rodar o projeto
+
+### Requisitos
+
+- Android Studio recente;
+- JDK 17;
+- Android SDK instalado;
+- device fisico ou emulador com internet.
+
+O projeto usa Gradle Wrapper, entao nao precisa instalar Gradle manualmente.
+
+### Pelo Android Studio
+
+1. Descompacte o `.zip`.
+2. Abra a pasta do projeto no Android Studio.
+3. Aguarde o Gradle Sync terminar.
+4. Selecione a configuracao `app`.
+5. Escolha um device fisico ou emulador.
+6. Clique em **Run**.
+
+### Pelo terminal
+
+Gerar o APK debug:
+
+```bash
+./gradlew :app:assembleDebug
+```
+
+Instalar no device conectado:
+
+```bash
+./gradlew :app:installDebug
+```
+
+Rodar os testes unitarios principais:
+
+```bash
+./gradlew :observability:test :feature:shortener:domain:test :feature:shortener:data:test :feature:shortener:presentation:testDebugUnitTest
+```
+
+Rodar a validacao principal:
+
+```bash
+./gradlew :app:assembleDebug :observability:test :feature:shortener:domain:test :feature:shortener:data:test :feature:shortener:presentation:testDebugUnitTest :app:assembleDebugAndroidTest
+```
+
+### Sentry opcional
+
+O app roda sem configurar Sentry.
+
+Se quiser testar envio para Sentry, crie um arquivo `local.properties` na raiz do projeto e adicione:
+
+```properties
+SENTRY_DSN=https://seu-dsn@sentry.io/projeto
+```
+
+Esse arquivo nao deve ser enviado junto com credenciais reais.
+
+### Observacao sobre a API
+
+O app usa uma API publica hospedada no Render. Em alguns momentos ela pode demorar para responder por cold start. Quando isso acontece, o app mostra uma mensagem amigavel de erro.
+
 ## Arquitetura
 
 O projeto usa Single Activity, Jetpack Compose, MVVM com `StateFlow`, Koin, Ktor e modulos separados por responsabilidade.
