@@ -13,4 +13,7 @@ object NuColors {
     val TextPrimary = Color(0xFF2A1D2F)
     val TextSecondary = Color(0xFF5F5268)
     val TextTertiary = Color(0xFF7B6F82)
+
+    val Error = Color(0xFFD32F2F)
+    val Success = Color(0xFF128A42)
 }

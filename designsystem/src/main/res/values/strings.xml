@@ -1,7 +1,7 @@
 <resources>
     <string name="nu_url_text_field_label">URL</string>
     <string name="nu_url_text_field_placeholder">https://nubank.com.br</string>
-    <string name="nu_preview_title">Nu Shortener</string>
+    <string name="nu_preview_title">Shortener</string>
     <string name="nu_preview_subtitle">Cole uma URL longa, gere um link curto e copie para compartilhar.</string>
     <string name="nu_preview_section_title">Links encurtados recentemente</string>
     <string name="nu_preview_helper">O botão envia a URL para a API e retorna um link curto.</string>
@@ -14,4 +14,6 @@
     <string name="nu_preview_recent_link">abc123</string>
     <string name="nu_preview_empty_state">Nenhum link encurtado ainda.</string>
     <string name="nu_preview_button">Encurtar</string>
+    <string name="nu_preview_error_message">URL inválida. Tente algo como nubank.com.br.</string>
+    <string name="nu_preview_success_message">Link encurtado com sucesso.</string>
 </resources>

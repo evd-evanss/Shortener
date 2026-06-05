@@ -3,8 +3,8 @@ package com.nubank.shortener.feature.shortener.presentation.main
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.nubank.shortener.feature.shortener.presentation.screen.ShortenerViewModel
 import com.nubank.shortener.feature.shortener.presentation.screen.ShortenerScreen
+import com.nubank.shortener.feature.shortener.presentation.screen.ShortenerViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable

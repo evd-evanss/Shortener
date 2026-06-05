@@ -32,7 +32,15 @@ No app, o botao **Abrir URL** nao faz uma nova chamada de rede. Ele abre a URL o
 
 ## Arquitetura
 
-O projeto usa Single Activity, Jetpack Compose, Koin, Ktor e modulos separados por responsabilidade.
+O projeto usa Single Activity, Jetpack Compose, MVVM com `StateFlow`, Koin, Ktor e modulos separados por responsabilidade.
+
+Na camada de tela, usamos MVVM:
+
+- a View e a tela em Compose;
+- o ViewModel recebe as acoes do usuario;
+- o ViewModel chama os use cases;
+- o estado da tela fica em um `ShortenerUiState`;
+- a tela observa esse estado e se redesenha.
 
 ```text
 :app
@@ -52,6 +60,16 @@ Hoje a divisao e:
 - modulos Kotlin puros: `:observability`, `:network`, `:feature:shortener:domain`, `:feature:shortener:data`.
 
 Isso ajuda a manter regra, dados, rede e tela separados.
+
+Tambem usamos Clean Architecture dentro da feature:
+
+```text
+presentation
+  -> domain
+  -> data
+```
+
+A tela depende do ViewModel, o ViewModel depende do use case, e o use case depende de uma abstracao de repository.
 
 ## Modulos
 
@@ -89,7 +107,7 @@ Feature da splash.
 
 Aqui ficam:
 
-- tela roxa de abertura;
+- tela de abertura;
 - textos da splash;
 - tempo de exibicao;
 - callback para avisar que a navegacao pode continuar.
@@ -105,8 +123,6 @@ Aqui ficam:
 - estado da tela com `StateFlow`;
 - mensagens que aparecem para o usuario;
 - ligacao entre a tela e o use case.
-
-O ViewModel nao usa `Context`, o que facilita teste unitario.
 
 ### `:feature:shortener:domain`
 
@@ -156,6 +172,7 @@ Aqui ficam:
 
 - tema;
 - cores;
+- tipografia;
 - textos;
 - botao principal;
 - campo de URL;
@@ -166,14 +183,36 @@ Aqui ficam:
 
 ### `:observability`
 
-Logs e Sentry.
+Logs e provedores de observabilidade.
 
-Hoje ele:
+O app usa `AppLogger` nas features. Esse contrato nao conhece Sentry, Datadog ou New Relic.
 
-- escreve logs no console com a tag `NuLogs`;
-- quebra logs grandes em varias linhas para facilitar leitura;
-- envia breadcrumbs para o Sentry;
-- envia erros para o Sentry quando configurado.
+Dentro do modulo, o log vira um `LogEvent` com:
+
+- nivel;
+- mensagem;
+- erro opcional;
+- atributos simples, como `alias`, `path` ou `errorType`.
+
+Depois o `CompositeAppLogger` envia esse evento para destinos configurados.
+
+Hoje existem:
+
+- `ConsoleLogSink`: escreve logs no console com a tag `NuLogs`;
+- `SentryLogSink`: envia breadcrumbs e erros para o Sentry.
+
+Se amanha precisarmos trocar ou adicionar New Relic/Datadog, a ideia e criar outro destino de log e trocar a configuracao no Koin:
+
+```kotlin
+CompositeAppLogger(
+    sinks = listOf(
+        ConsoleLogSink(),
+        SentryLogSink(),
+    ),
+)
+```
+
+`Sink` aqui significa destino do log.
 
 A inicializacao Android do Sentry fica no `:app`. O DSN entra por `local.properties` ou variavel de ambiente.
 
@@ -218,6 +257,7 @@ URL invalida
 - OkHttp: engine do Ktor.
 - Kotlinx Serialization: JSON.
 - Sentry: observabilidade.
+- Manrope: fonte usada pelo design system.
 - JUnit: testes unitarios.
 - Turbine: testes de `StateFlow` no ViewModel.
 - Compose UI Test: teste instrumentado basico da tela.
@@ -242,6 +282,26 @@ export SENTRY_DSN="https://seu-dsn@sentry.io/projeto"
 Se o DSN estiver vazio, o app nao inicia o Sentry.
 
 ## Testes
+
+### Unitarios de observability
+
+Arquivo:
+
+```text
+observability/src/test/java/.../CompositeAppLoggerTest.kt
+```
+
+Cobre:
+
+- log de info enviado para todos os destinos;
+- log de erro mantendo `Throwable` e atributos;
+- falha em um destino sem impedir envio para os outros destinos.
+
+Rodar:
+
+```bash
+./gradlew :observability:test
+```
 
 ### Unitarios de domain
 
@@ -381,13 +441,13 @@ Gerar o app:
 Rodar todos os testes unitarios atuais:
 
 ```bash
-./gradlew :feature:shortener:domain:test :feature:shortener:data:test :feature:shortener:presentation:testDebugUnitTest
+./gradlew :observability:test :feature:shortener:domain:test :feature:shortener:data:test :feature:shortener:presentation:testDebugUnitTest
 ```
 
 Rodar validacao principal:
 
 ```bash
-./gradlew :app:assembleDebug :feature:shortener:domain:test :feature:shortener:data:test :feature:shortener:presentation:testDebugUnitTest :app:assembleDebugAndroidTest
+./gradlew :app:assembleDebug :observability:test :feature:shortener:domain:test :feature:shortener:data:test :feature:shortener:presentation:testDebugUnitTest :app:assembleDebugAndroidTest
 ```
 
 Rodar lint:

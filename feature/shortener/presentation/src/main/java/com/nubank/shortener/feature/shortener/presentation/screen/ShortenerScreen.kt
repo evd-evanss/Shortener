@@ -1,7 +1,6 @@
 package com.nubank.shortener.feature.shortener.presentation.screen
 
 import android.content.ClipData
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,11 +30,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nubank.shortener.designsystem.component.NuEmptyState
+import com.nubank.shortener.designsystem.component.NuFeedback
 import com.nubank.shortener.designsystem.component.NuInfoCard
 import com.nubank.shortener.designsystem.component.NuLinearProgress
 import com.nubank.shortener.designsystem.component.NuPrimaryButton
-import com.nubank.shortener.designsystem.component.NuUrlTextField
 import com.nubank.shortener.designsystem.component.NuText
+import com.nubank.shortener.designsystem.component.NuTextField
 import com.nubank.shortener.designsystem.component.NuTextStyle
 import com.nubank.shortener.designsystem.theme.NuTheme
 import com.nubank.shortener.feature.shortener.domain.model.ShortenedUrl
@@ -74,7 +74,17 @@ internal fun ShortenerScreen(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                snackbar = { snackbarData ->
+                    NuFeedback(
+                        snackbarData = snackbarData,
+                        isError = state.message?.message?.let { it != ShortenerMessage.Success } ?: false,
+                    )
+                },
+            )
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -96,7 +106,7 @@ internal fun ShortenerScreen(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                NuUrlTextField(
+                NuTextField(
                     modifier = Modifier.weight(1f),
                     value = state.url,
                     onValueChange = onUrlChanged,
@@ -114,23 +124,14 @@ internal fun ShortenerScreen(
                 )
             }
 
-            NuText(
-                text = stringResource(R.string.shortener_helper),
-                style = NuTextStyle.Helper,
-                modifier = Modifier.padding(top = 8.dp),
+            NuLinearProgress(
+                isLoading = state.isLoading,
             )
 
-            AnimatedVisibility(visible = state.isLoading) {
-                NuLinearProgress(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 14.dp),
-                )
-            }
-
-            Spacer(Modifier.height(30.dp))
-
-            NuText(text = stringResource(R.string.shortener_recent_title), style = NuTextStyle.SectionTitle)
+            NuText(
+                text = stringResource(R.string.shortener_recent_title),
+                style = NuTextStyle.SectionTitle
+            )
             Spacer(Modifier.height(12.dp))
 
             if (state.history.isEmpty()) {
@@ -214,14 +215,20 @@ private fun HistoryItem(
                     }
                 },
             ) {
-                NuText(text = stringResource(R.string.shortener_copy_action), style = NuTextStyle.Action)
+                NuText(
+                    text = stringResource(R.string.shortener_copy_action),
+                    style = NuTextStyle.Action
+                )
             }
             TextButton(
                 onClick = {
                     onOpenClick(item)
                 },
             ) {
-                NuText(text = stringResource(R.string.shortener_open_action), style = NuTextStyle.Action)
+                NuText(
+                    text = stringResource(R.string.shortener_open_action),
+                    style = NuTextStyle.Action
+                )
             }
         }
     }
@@ -230,7 +237,7 @@ private fun HistoryItem(
 
 @Preview
 @Composable
-private fun  ShortenerScreenPreview() {
+private fun ShortenerScreenPreview() {
     NuTheme {
         ShortenerScreen(
             state = ShortenerUiState(

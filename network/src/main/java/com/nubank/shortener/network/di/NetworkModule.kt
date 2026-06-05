@@ -2,7 +2,7 @@ package com.nubank.shortener.network.di
 
 import com.nubank.shortener.network.NetworkClient
 import com.nubank.shortener.network.NetworkConfig
-import com.nubank.shortener.observability.logging.AppLogger
+import com.nubank.shortener.observability.logging.logger.AppLogger
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.DefaultRequest

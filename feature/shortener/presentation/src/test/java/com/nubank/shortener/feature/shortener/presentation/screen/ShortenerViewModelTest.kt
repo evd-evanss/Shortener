@@ -5,7 +5,7 @@ import com.nubank.shortener.feature.shortener.domain.model.ShortenedUrl
 import com.nubank.shortener.feature.shortener.domain.repository.UrlShortenerRepository
 import com.nubank.shortener.feature.shortener.domain.usecase.ShortenUrlUseCase
 import com.nubank.shortener.feature.shortener.presentation.screen.states.ShortenerMessage
-import com.nubank.shortener.observability.logging.AppLogger
+import com.nubank.shortener.observability.logging.logger.AppLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher

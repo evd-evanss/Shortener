@@ -1,8 +1,7 @@
 <resources>
-    <string name="shortener_title">Nu Shortener</string>
+    <string name="shortener_title">Shortener</string>
     <string name="shortener_subtitle">Cole uma URL longa, gere um link curto e copie para compartilhar.</string>
     <string name="shortener_submit">Encurtar</string>
-    <string name="shortener_helper">Digite uma url para encurtar</string>
     <string name="shortener_recent_title">Links encurtados recentemente</string>
     <string name="shortener_empty_history">Nenhum link encurtado ainda.</string>
     <string name="shortener_generated_link_title">Alias gerado</string>

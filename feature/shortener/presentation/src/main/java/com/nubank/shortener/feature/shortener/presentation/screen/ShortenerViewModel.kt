@@ -9,7 +9,7 @@ import com.nubank.shortener.feature.shortener.domain.usecase.ShortenUrlUseCase
 import com.nubank.shortener.feature.shortener.presentation.screen.states.ShortenerMessage
 import com.nubank.shortener.feature.shortener.presentation.screen.states.ShortenerUiState
 import com.nubank.shortener.feature.shortener.presentation.screen.states.UiMessage
-import com.nubank.shortener.observability.logging.AppLogger
+import com.nubank.shortener.observability.logging.logger.AppLogger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +25,7 @@ class ShortenerViewModel(
 
     fun onUrlChanged(value: String) {
         _state.update { current ->
-            current.copy(url = value, message = null)
+            current.copy(url = value.lowercase(), message = null)
         }
     }
 
@@ -76,14 +76,21 @@ class ShortenerViewModel(
             ShortenerError.InvalidUrl -> setMessage(ShortenerMessage.InvalidUrl)
             ShortenerError.ServiceUnavailable -> setMessage(ShortenerMessage.ServiceUnavailable)
             is ShortenerError.Unknown -> {
-                logger.error("Unknown shortening error: ${error.message}")
+                logger.error(
+                    message = "Unknown shortening error",
+                    attributes = mapOf("message" to error.message),
+                    throwable = null,
+                )
                 setMessage(ShortenerMessage.UnknownError)
             }
         }
     }
 
     private fun setMessage(message: ShortenerMessage) {
-        logger.error("Showing message to user: ${message.name}")
+        logger.info(
+            message = "Showing message to user",
+            attributes = mapOf("message" to message.name),
+        )
         _state.update { current ->
             current.copy(isLoading = false, message = UiMessage(message))
         }

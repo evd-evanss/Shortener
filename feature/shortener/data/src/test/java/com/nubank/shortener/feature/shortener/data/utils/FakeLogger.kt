@@ -1,6 +1,6 @@
 package com.nubank.shortener.feature.shortener.data.utils
 
-import com.nubank.shortener.observability.logging.AppLogger
+import com.nubank.shortener.observability.logging.logger.AppLogger
 
 internal class FakeLogger : AppLogger {
     val errors = mutableListOf<LoggedError>()

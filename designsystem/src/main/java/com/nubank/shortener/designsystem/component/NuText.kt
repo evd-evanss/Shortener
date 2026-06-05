@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nubank.shortener.designsystem.R
 import com.nubank.shortener.designsystem.theme.NuColors
+import com.nubank.shortener.designsystem.theme.NuFontFamily
 import com.nubank.shortener.designsystem.theme.NuTheme
 
 enum class NuTextStyle {
@@ -69,33 +70,42 @@ private fun NuTextStyle.defaultColor(): Color = when (this) {
 private fun NuTextStyle.textStyle(): TextStyle = when (this) {
     NuTextStyle.ScreenTitle -> TextStyle(
         fontSize = 32.sp,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.ExtraBold,
     )
 
-    NuTextStyle.ScreenSubtitle -> TextStyle(fontSize = 16.sp)
+    NuTextStyle.ScreenSubtitle -> TextStyle(
+        fontSize = 16.sp,
+        fontWeight = FontWeight.Medium,
+    )
 
     NuTextStyle.SectionTitle -> TextStyle(
         fontSize = 18.sp,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.ExtraBold,
     )
 
-    NuTextStyle.Helper -> TextStyle(fontSize = 13.sp)
+    NuTextStyle.Helper -> TextStyle(
+        fontSize = 13.sp,
+        fontWeight = FontWeight.Medium,
+    )
 
-    NuTextStyle.CardTitle -> TextStyle(fontWeight = FontWeight.Bold)
+    NuTextStyle.CardTitle -> TextStyle(fontWeight = FontWeight.ExtraBold)
 
-    NuTextStyle.CardValue -> TextStyle(fontWeight = FontWeight.SemiBold)
+    NuTextStyle.CardValue -> TextStyle(fontWeight = FontWeight.Bold)
 
     NuTextStyle.CardLabel -> TextStyle(
         fontSize = 12.sp,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Bold,
     )
 
-    NuTextStyle.CardCaption -> TextStyle(fontSize = 12.sp)
+    NuTextStyle.CardCaption -> TextStyle(
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Medium,
+    )
 
-    NuTextStyle.Action -> TextStyle(fontWeight = FontWeight.SemiBold)
+    NuTextStyle.Action -> TextStyle(fontWeight = FontWeight.Bold)
 
-    NuTextStyle.Body -> TextStyle()
-}
+    NuTextStyle.Body -> TextStyle(fontWeight = FontWeight.Medium)
+}.copy(fontFamily = NuFontFamily)
 
 @Preview(name = "NuText", showBackground = true)
 @Composable
