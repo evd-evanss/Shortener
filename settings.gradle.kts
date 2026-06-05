@@ -14,7 +14,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "NubankUrlShortener"
+rootProject.name = "Shortener"
 include(":app")
 include(":navigation")
 include(":observability")

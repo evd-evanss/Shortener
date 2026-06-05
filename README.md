@@ -1,4 +1,4 @@
-# NubankUrlShortener
+# Shortener
 
 App Android simples para encurtar URLs.
 
