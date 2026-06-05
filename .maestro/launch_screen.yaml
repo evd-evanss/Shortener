@@ -3,7 +3,7 @@ appId: com.nubank.shortener
 - launchApp:
     clearState: true
 - extendedWaitUntil:
-    visible: "Nu Shortener"
+    visible: "Shortener"
     timeout: 5000
 - assertVisible: "Cole uma URL longa, gere um link curto e copie para compartilhar."
 - assertVisible: "Links encurtados recentemente"

@@ -1,11 +1,10 @@
-package com.nubank.shortener.observability.logging.sink
+package com.nubank.shortener.observability.logging.report
 
 import com.nubank.shortener.observability.logging.model.LogEvent
-import com.nubank.shortener.observability.logging.sink.LogSink
 
-class ConsoleLogSink(
+class ConsoleReport(
     private val tag: String = "NuLogs",
-) : LogSink {
+) : Report {
     override fun log(event: LogEvent) {
         printLog(event.message)
         event.attributes

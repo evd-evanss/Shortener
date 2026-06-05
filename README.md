@@ -2,8 +2,6 @@
 
 App Android simples para encurtar URLs.
 
-O usuario digita uma URL, toca em **Encurtar** e o app mostra o alias criado pela API. Se a API falhar, o app mostra uma mensagem amigavel. Nenhum link falso e criado no app.
-
 ## O que o app faz
 
 1. Recebe uma URL, como `nubank.com.br`.
@@ -20,7 +18,7 @@ A API usada para encurtar e:
 https://url-shortener-server.onrender.com/api/alias
 ```
 
-Observacao: a API gera um alias curto, mas o dominio publico da API e longo. Por isso o link completo retornado pela API pode ficar maior do que algumas URLs originais.
+Observacao: a API gera um alias curto, mas o dominio publico da API é longo. Por isso o link completo retornado pela API pode ficar maior do que algumas URLs originais.
 
 O que e curto no retorno e o alias:
 
@@ -28,16 +26,16 @@ O que e curto no retorno e o alias:
 609299506
 ```
 
-No app, o botao **Abrir URL** nao faz uma nova chamada de rede. Ele abre a URL original que ja veio na resposta do encurtamento.
+No app, o botao **Abrir URL** abre a URL original que ja veio na resposta do encurtamento.
 
 ## Arquitetura
 
 O projeto usa Single Activity, Jetpack Compose, MVVM com `StateFlow`, Koin, Ktor e modulos separados por responsabilidade.
 
-Na camada de tela, usamos MVVM:
+Na camada de apresentação, estou utilizando MVVM:
 
-- a View e a tela em Compose;
-- o ViewModel recebe as acoes do usuario;
+- a View é a tela em Compose;
+- o ViewModel recebe as ações do usuário;
 - o ViewModel chama os use cases;
 - o estado da tela fica em um `ShortenerUiState`;
 - a tela observa esse estado e se redesenha.
@@ -54,22 +52,22 @@ Na camada de tela, usamos MVVM:
 :feature:shortener:presentation
 ```
 
-Hoje a divisao e:
+Hoje a divisao é:
 
 - modulos Android: `:app`, `:navigation`, `:designsystem`, `:feature:splash`, `:feature:shortener:presentation`;
 - modulos Kotlin puros: `:observability`, `:network`, `:feature:shortener:domain`, `:feature:shortener:data`.
 
 Isso ajuda a manter regra, dados, rede e tela separados.
 
-Tambem usamos Clean Architecture dentro da feature:
+Tambem estou utilizando Clean Architecture dentro da feature:
 
 ```text
-presentation
+  -> presentation
   -> domain
   -> data
 ```
 
-A tela depende do ViewModel, o ViewModel depende do use case, e o use case depende de uma abstracao de repository.
+A tela depende do ViewModel, o ViewModel depende do use case, e o use case depende de uma abstração de repository.
 
 ## Modulos
 
@@ -77,7 +75,7 @@ A tela depende do ViewModel, o ViewModel depende do use case, e o use case depen
 
 Entrada do aplicativo.
 
-Responsavel por:
+Responsável por:
 
 - abrir a `MainActivity`;
 - aplicar o tema;
@@ -87,9 +85,9 @@ Responsavel por:
 
 ### `:navigation`
 
-Grafo de navegacao do app.
+Grafo de navegação do app.
 
-Responsavel por:
+Responsável por:
 
 - definir as rotas principais;
 - iniciar pela splash;
@@ -131,28 +129,28 @@ Regras principais.
 Aqui o app decide:
 
 - se a URL esta vazia;
-- se a URL e valida;
+- se a URL é válida;
 - se precisa adicionar `https://`;
 - se o resultado e sucesso;
 - se deve retornar erro quando a API falha.
 
-Esse modulo nao conhece Compose, Android, Ktor ou Sentry.
+Esse modulo não conhece Compose, Android, Ktor ou Sentry.
 
 ### `:feature:shortener:data`
 
 Dados da feature.
 
-Responsavel por:
+Responsável por:
 
 - chamar o remoto por meio de `AliasRemoteDataSource`;
 - transformar a resposta da API em `ShortenedUrl`;
 - devolver `Result.failure` quando a API falha.
 
-O repository depende de uma abstracao remota, entao conseguimos testar sem Ktor e sem rede real.
+O repository depende de uma abstração remota, então conseguimos testar sem Ktor e sem rede real.
 
 ### `:network`
 
-Configuracao de rede.
+Configuração de rede.
 
 Centraliza:
 
@@ -173,19 +171,13 @@ Aqui ficam:
 - tema;
 - cores;
 - tipografia;
-- textos;
-- botao principal;
-- campo de URL;
-- card;
-- loading;
-- empty state;
-- previews dos componentes.
+- componentes;
 
 ### `:observability`
 
 Logs e provedores de observabilidade.
 
-O app usa `AppLogger` nas features. Esse contrato nao conhece Sentry, Datadog ou New Relic.
+O app usa `AppLogger` nas features. Esse contrato não conhece Sentry, Datadog ou New Relic.
 
 Dentro do modulo, o log vira um `LogEvent` com:
 
@@ -198,31 +190,33 @@ Depois o `CompositeAppLogger` envia esse evento para destinos configurados.
 
 Hoje existem:
 
-- `ConsoleLogSink`: escreve logs no console com a tag `NuLogs`;
-- `SentryLogSink`: envia breadcrumbs e erros para o Sentry.
+- `ConsoleReport`: escreve logs no console com a tag `NuLogs`;
+- `SentryReport`: envia breadcrumbs e erros para o Sentry.
 
-Se amanha precisarmos trocar ou adicionar New Relic/Datadog, a ideia e criar outro destino de log e trocar a configuracao no Koin:
+Se amanha precisarmos trocar ou adicionar New Relic/Datadog, a ideia é criar outro report de log e trocar a configuracão no Koin:
 
 ```kotlin
 CompositeAppLogger(
-    sinks = listOf(
-        ConsoleLogSink(),
-        SentryLogSink(),
+    reports = listOf(
+        ConsoleReport(),
+        SentryReport(),
     ),
 )
 ```
 
-`Sink` aqui significa destino do log.
-
-A inicializacao Android do Sentry fica no `:app`. O DSN entra por `local.properties` ou variavel de ambiente.
+A inicializacao Android do Sentry fica no `:app`. O DSN entra por `local.properties` ou variável de ambiente.
 
 ## Fluxo
+
+Quando entra:
+
 
 ```text
 App
   -> Navigation
   -> Splash
   -> Shortener
+      -> Screen
       -> ViewModel
       -> UseCase
       -> Repository
@@ -240,14 +234,14 @@ API funcionou
   -> mostra mensagem de sucesso
 
 API falhou
-  -> mostra mensagem amigavel
+  -> mostra mensagem amigável
 
 URL invalida
   -> nao chama a API
   -> mostra mensagem amigavel
 ```
 
-## Bibliotecas
+## Bibliotecas utilizadas nesse app
 
 - Jetpack Compose: telas.
 - Navigation Compose: navegacao entre features.
@@ -257,7 +251,6 @@ URL invalida
 - OkHttp: engine do Ktor.
 - Kotlinx Serialization: JSON.
 - Sentry: observabilidade.
-- Manrope: fonte usada pelo design system.
 - JUnit: testes unitarios.
 - Turbine: testes de `StateFlow` no ViewModel.
 - Compose UI Test: teste instrumentado basico da tela.
@@ -456,7 +449,7 @@ Rodar lint:
 ./gradlew lintDebug
 ```
 
-## Regras do projeto
+## Guards do projeto
 
 - Texto visivel para o usuario fica em `strings.xml`.
 - Texto tecnico de log pode ficar no codigo.
@@ -464,8 +457,7 @@ Rodar lint:
 - Configuracao de rede fica no `:network`.
 - Logs e Sentry ficam no `:observability`.
 - Navegacao principal fica no `:navigation`.
-- Splash fica no `:feature:splash`.
-- Regras ficam no `:feature:shortener:domain`.
-- Dados ficam no `:feature:shortener:data`.
-- Tela e estado ficam no `:feature:shortener:presentation`.
+- Regras ficam no `:domain`.
+- Dados ficam no `:data`.
+- Tela e estado ficam no `:presentation`.
 - Testes seguem o padrao Given, When, Then.

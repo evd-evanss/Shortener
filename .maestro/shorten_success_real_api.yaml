@@ -3,7 +3,7 @@ appId: com.nubank.shortener
 - launchApp:
     clearState: true
 - extendedWaitUntil:
-    visible: "Nu Shortener"
+    visible: "Shortener"
     timeout: 5000
 - tapOn: "https://nubank.com.br"
 - inputText: "nubank.com.br"

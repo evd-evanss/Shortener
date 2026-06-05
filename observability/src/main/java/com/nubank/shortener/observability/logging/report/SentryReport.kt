@@ -1,16 +1,15 @@
-package com.nubank.shortener.observability.logging.sink
+package com.nubank.shortener.observability.logging.report
 
 import com.nubank.shortener.observability.logging.model.LogEvent
 import com.nubank.shortener.observability.logging.model.LogLevel
-import com.nubank.shortener.observability.logging.sink.LogSink
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import io.sentry.protocol.SentryId
 
-class SentryLogSink(
+class SentryReport(
     private val tag: String = "NuLogs",
-) : LogSink {
+) : Report {
     override fun log(event: LogEvent) {
         when (event.level) {
             LogLevel.Info -> addBreadcrumb(event)

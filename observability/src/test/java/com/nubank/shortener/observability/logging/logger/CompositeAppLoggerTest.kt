@@ -2,7 +2,7 @@ package com.nubank.shortener.observability.logging.logger
 
 import com.nubank.shortener.observability.logging.model.LogEvent
 import com.nubank.shortener.observability.logging.model.LogLevel
-import com.nubank.shortener.observability.logging.sink.LogSink
+import com.nubank.shortener.observability.logging.report.Report
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
@@ -11,8 +11,8 @@ class CompositeAppLoggerTest {
     @Test
     fun `given info log when logger receives message then sends event to every sink`() {
         // Given
-        val firstSink = FakeLogSink()
-        val secondSink = FakeLogSink()
+        val firstSink = FakeReport()
+        val secondSink = FakeReport()
         val logger = CompositeAppLogger(listOf(firstSink, secondSink))
 
         // When
@@ -34,7 +34,7 @@ class CompositeAppLoggerTest {
     @Test
     fun `given error log when logger receives throwable then keeps throwable and attributes`() {
         // Given
-        val sink = FakeLogSink()
+        val sink = FakeReport()
         val logger = CompositeAppLogger(listOf(sink))
         val throwable = IllegalStateException("API unavailable")
 
@@ -56,10 +56,10 @@ class CompositeAppLoggerTest {
     @Test
     fun `given one sink fails when logger receives message then sends event to remaining sinks`() {
         // Given
-        val workingSink = FakeLogSink()
+        val workingSink = FakeReport()
         val logger = CompositeAppLogger(
             listOf(
-                FailingLogSink(),
+                FailingReport(),
                 workingSink,
             ),
         )
@@ -80,7 +80,7 @@ class CompositeAppLoggerTest {
     }
 }
 
-private class FakeLogSink : LogSink {
+private class FakeReport : Report {
     val events = mutableListOf<LogEvent>()
 
     override fun log(event: LogEvent) {
@@ -88,7 +88,7 @@ private class FakeLogSink : LogSink {
     }
 }
 
-private class FailingLogSink : LogSink {
+private class FailingReport : Report {
     override fun log(event: LogEvent) {
         error("Sink unavailable")
     }

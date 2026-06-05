@@ -2,10 +2,10 @@ package com.nubank.shortener.observability.logging.logger
 
 import com.nubank.shortener.observability.logging.model.LogEvent
 import com.nubank.shortener.observability.logging.model.LogLevel
-import com.nubank.shortener.observability.logging.sink.LogSink
+import com.nubank.shortener.observability.logging.report.Report
 
 class CompositeAppLogger(
-    private val sinks: List<LogSink>,
+    private val reports: List<Report>,
 ) : AppLogger {
     override fun info(message: String) {
         info(message, emptyMap())
@@ -41,9 +41,9 @@ class CompositeAppLogger(
     }
 
     private fun log(event: LogEvent) {
-        sinks.forEach { sink ->
+        reports.forEach { report ->
             runCatching {
-                sink.log(event)
+                report.log(event)
             }
         }
     }
