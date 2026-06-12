@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.nubank.shortener.navigation"
+    namespace = "com.shortener.navigation"
     compileSdk = 37
 
     defaultConfig {
@@ -14,7 +14,6 @@ android {
 
 dependencies {
     implementation(project(":feature:splash"))
-    implementation(project(":feature:shortener:presentation"))
     implementation("androidx.compose.runtime:runtime:1.11.1")
     implementation("androidx.navigation:navigation-compose:2.9.6")
 }

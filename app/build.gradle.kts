@@ -18,7 +18,7 @@ val sentryDsn = providers.gradleProperty("SENTRY_DSN")
     .get()
 
 android {
-    namespace = "com.nubank.shortener"
+    namespace = "com.shortener"
     compileSdk = 37
 
     buildFeatures {
@@ -26,7 +26,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.nubank.shortener"
+        applicationId = "com.shortener"
         minSdk = 26
         targetSdk = 37
         versionCode = 1
@@ -40,7 +40,7 @@ dependencies {
     implementation(project(":navigation"))
     implementation(project(":observability"))
     implementation(project(":network"))
-    implementation(project(":feature:shortener:presentation"))
+    implementation(project(":feature:shortener:impl"))
 
     implementation("androidx.activity:activity-compose:1.12.0")
     implementation("androidx.compose.material3:material3:1.5.0-alpha17")

@@ -1,18 +1,18 @@
-appId: com.nubank.shortener
+appId: com.shortener
 ---
 - launchApp:
     clearState: true
 - extendedWaitUntil:
     visible: "Shortener"
     timeout: 5000
-- tapOn: "https://nubank.com.br"
-- inputText: "nubank.com.br"
+- tapOn: "https://example.com"
+- inputText: "example.com"
 - tapOn: "Encurtar"
 - extendedWaitUntil:
     visible: "Alias gerado"
     timeout: 45000
 - assertVisible: "Url encurtada"
 - assertVisible: "URL original"
-- assertVisible: "https://nubank.com.br"
+- assertVisible: "https://example.com"
 - assertVisible: "Copiar"
 - assertVisible: "Abrir URL"
