@@ -1,4 +1,4 @@
-appId: com.nubank.shortener
+appId: com.shortener
 ---
 - launchApp:
     clearState: true

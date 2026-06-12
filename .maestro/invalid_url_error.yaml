@@ -1,11 +1,11 @@
-appId: com.nubank.shortener
+appId: com.shortener
 ---
 - launchApp:
     clearState: true
 - extendedWaitUntil:
     visible: "Shortener"
     timeout: 5000
-- tapOn: "https://nubank.com.br"
+- tapOn: "https://example.com"
 - inputText: "just words"
 - tapOn: "Encurtar"
-- assertVisible: "URL inválida. Tente algo como nubank.com.br."
+- assertVisible: "URL inválida. Tente algo como example.com."

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.nubank.shortener.designsystem"
+    namespace = "com.shortener.designsystem"
     compileSdk = 37
 
     defaultConfig {

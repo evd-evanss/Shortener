@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.nubank.shortener.feature.splash"
+    namespace = "com.shortener.feature.splash"
     compileSdk = 37
 
     defaultConfig {

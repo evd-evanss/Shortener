@@ -4,8 +4,8 @@ App Android simples para encurtar URLs.
 
 ## O que o app faz
 
-1. Recebe uma URL, como `nubank.com.br`.
-2. Ajusta para um formato valido, como `https://nubank.com.br`.
+1. Recebe uma URL, como `example.com`.
+2. Ajusta para um formato valido, como `https://example.com`.
 3. Envia a URL para a API.
 4. Mostra o alias gerado na lista de links recentes.
 5. Permite copiar o link retornado pela API.
@@ -65,13 +65,13 @@ Instalar no device conectado:
 Rodar os testes unitarios principais:
 
 ```bash
-./gradlew :observability:test :feature:shortener:domain:test :feature:shortener:data:test :feature:shortener:presentation:testDebugUnitTest
+./gradlew :observability:test :feature:shortener:impl:testDebugUnitTest
 ```
 
 Rodar a validacao principal:
 
 ```bash
-./gradlew :app:assembleDebug :observability:test :feature:shortener:domain:test :feature:shortener:data:test :feature:shortener:presentation:testDebugUnitTest :app:assembleDebugAndroidTest
+./gradlew :app:assembleDebug :observability:test :feature:shortener:impl:testDebugUnitTest :app:assembleDebugAndroidTest
 ```
 
 ### Sentry opcional
@@ -109,27 +109,33 @@ Na camada de apresentação, estou utilizando MVVM:
 :observability
 :network
 :feature:splash
-:feature:shortener:domain
-:feature:shortener:data
-:feature:shortener:presentation
+:feature:shortener:api
+:feature:shortener:impl
 ```
 
 Hoje a divisao é:
 
-- modulos Android: `:app`, `:navigation`, `:designsystem`, `:feature:splash`, `:feature:shortener:presentation`;
-- modulos Kotlin puros: `:observability`, `:network`, `:feature:shortener:domain`, `:feature:shortener:data`.
+- modulos Android: `:app`, `:navigation`, `:designsystem`, `:feature:splash`, `:feature:shortener:impl`;
+- modulos Kotlin puros: `:observability`, `:network`, `:feature:shortener:api`.
 
-Isso ajuda a manter regra, dados, rede e tela separados.
+Isso ajuda a manter contrato publico, implementacao, rede e tela separados.
 
-Tambem estou utilizando Clean Architecture dentro da feature:
+Na feature principal, estou usando o padrao API/Implementation:
 
 ```text
-  -> presentation
-  -> domain
-  -> data
+:app  -> :feature:shortener:impl
+:impl -> :feature:shortener:api
 ```
 
-A tela depende do ViewModel, o ViewModel depende do use case, e o use case depende de uma abstração de repository.
+O modulo `api` expoe apenas contrato e modelos publicos em Kotlin puro. O modulo `impl` guarda a tela, ViewModel, regra de negocio, repository e chamada de rede.
+
+Dentro do `impl`, a organizacao continua separada:
+
+```text
+presentation -> domain <- data
+```
+
+A tela depende do ViewModel, o ViewModel depende do use case, e o use case depende de uma abstracao de repository.
 
 ## Modulos
 
@@ -143,7 +149,7 @@ Responsável por:
 - aplicar o tema;
 - iniciar o Koin;
 - configurar o Sentry quando existir DSN;
-- chamar o `NuNavHost`.
+- chamar o `AppNavHost`.
 
 ### `:navigation`
 
@@ -154,7 +160,7 @@ Responsável por:
 - definir as rotas principais;
 - iniciar pela splash;
 - navegar da splash para o encurtador;
-- manter o `app` sem chamar telas de feature diretamente.
+- receber o conteudo da feature por parametro, sem depender da implementacao dela.
 
 Hoje ele registra:
 
@@ -172,9 +178,22 @@ Aqui ficam:
 - tempo de exibicao;
 - callback para avisar que a navegacao pode continuar.
 
-### `:feature:shortener:presentation`
+### `:feature:shortener:api`
 
-Parte visual e estado da tela.
+Contrato publico da feature de encurtador.
+
+Aqui ficam:
+
+- interface publica `Shortener`;
+- resultado publico `ShortenUrlResult`;
+- modelos publicos `ShortenedUrl` e `ShortenerError`;
+- nenhum detalhe de Compose, Android, Ktor, repository, ViewModel ou regra interna.
+
+Esse modulo deve continuar leve e estavel. Ele nao tem Manifest, resources, Compose ou dependencia Android.
+
+### `:feature:shortener:impl`
+
+Implementacao privada da feature de encurtador.
 
 Aqui ficam:
 
@@ -182,33 +201,22 @@ Aqui ficam:
 - `ShortenerViewModel`;
 - estado da tela com `StateFlow`;
 - mensagens que aparecem para o usuario;
-- ligacao entre a tela e o use case.
+- use case de encurtamento;
+- regras de validacao e normalizacao da URL;
+- repository;
+- remoto da API;
+- DI interno da feature.
 
-### `:feature:shortener:domain`
+Outros modulos que precisarem da capacidade de encurtar URL devem enxergar apenas o contrato do `:feature:shortener:api`. A tela concreta fica no `impl` e é conectada pelo `:app`.
 
-Regras principais.
+Dentro do `impl`, a feature continua organizada em partes menores:
 
-Aqui o app decide:
-
-- se a URL esta vazia;
-- se a URL é válida;
-- se precisa adicionar `https://`;
-- se o resultado e sucesso;
-- se deve retornar erro quando a API falha.
-
-Esse modulo não conhece Compose, Android, Ktor ou Sentry.
-
-### `:feature:shortener:data`
-
-Dados da feature.
-
-Responsável por:
-
-- chamar o remoto por meio de `AliasRemoteDataSource`;
-- transformar a resposta da API em `ShortenedUrl`;
-- devolver `Result.failure` quando a API falha.
-
-O repository depende de uma abstração remota, então conseguimos testar sem Ktor e sem rede real.
+```text
+ui: tela, estado e ViewModel
+usecase: regra de encurtamento
+repository: contrato privado e implementacao dos dados
+remote: chamada da API
+```
 
 ### `:network`
 
@@ -252,7 +260,7 @@ Depois o `CompositeAppLogger` envia esse evento para destinos configurados.
 
 Hoje existem:
 
-- `ConsoleReport`: escreve logs no console com a tag `NuLogs`;
+- `ConsoleReport`: escreve logs no console com a tag `AppLogs`;
 - `SentryReport`: envia breadcrumbs e erros para o Sentry.
 
 Se amanha precisarmos trocar ou adicionar New Relic/Datadog, a ideia é criar outro report de log e trocar a configuracão no Koin:
@@ -358,12 +366,12 @@ Rodar:
 ./gradlew :observability:test
 ```
 
-### Unitarios de domain
+### Unitarios da regra de negocio
 
 Arquivo:
 
 ```text
-feature/shortener/domain/src/test/java/.../ShortenUrlUseCaseTest.kt
+feature/shortener/impl/src/test/java/.../ShortenUrlUseCaseTest.kt
 ```
 
 Cobre:
@@ -375,15 +383,15 @@ Cobre:
 Rodar:
 
 ```bash
-./gradlew :feature:shortener:domain:test
+./gradlew :feature:shortener:impl:testDebugUnitTest
 ```
 
-### Unitarios de data
+### Unitarios de dados
 
 Arquivo:
 
 ```text
-feature/shortener/data/src/test/java/.../UrlShortenerRepositoryImplTest.kt
+feature/shortener/impl/src/test/java/.../UrlShortenerRepositoryImplTest.kt
 ```
 
 Cobre:
@@ -397,15 +405,15 @@ Cobre:
 Rodar:
 
 ```bash
-./gradlew :feature:shortener:data:test
+./gradlew :feature:shortener:impl:testDebugUnitTest
 ```
 
-### Unitarios de presentation
+### Unitarios de ViewModel
 
 Arquivo:
 
 ```text
-feature/shortener/presentation/src/test/java/.../ShortenerViewModelTest.kt
+feature/shortener/impl/src/test/java/.../ShortenerViewModelTest.kt
 ```
 
 Usa Turbine para observar o `StateFlow`.
@@ -420,7 +428,7 @@ Cobre:
 Rodar:
 
 ```bash
-./gradlew :feature:shortener:presentation:testDebugUnitTest
+./gradlew :feature:shortener:impl:testDebugUnitTest
 ```
 
 ### Teste instrumentado
@@ -496,13 +504,13 @@ Gerar o app:
 Rodar todos os testes unitarios atuais:
 
 ```bash
-./gradlew :observability:test :feature:shortener:domain:test :feature:shortener:data:test :feature:shortener:presentation:testDebugUnitTest
+./gradlew :observability:test :feature:shortener:impl:testDebugUnitTest
 ```
 
 Rodar validacao principal:
 
 ```bash
-./gradlew :app:assembleDebug :observability:test :feature:shortener:domain:test :feature:shortener:data:test :feature:shortener:presentation:testDebugUnitTest :app:assembleDebugAndroidTest
+./gradlew :app:assembleDebug :observability:test :feature:shortener:impl:testDebugUnitTest :app:assembleDebugAndroidTest
 ```
 
 Rodar lint:
@@ -519,7 +527,7 @@ Rodar lint:
 - Configuracao de rede fica no `:network`.
 - Logs e Sentry ficam no `:observability`.
 - Navegacao principal fica no `:navigation`.
-- Regras ficam no `:domain`.
-- Dados ficam no `:data`.
-- Tela e estado ficam no `:presentation`.
+- Contrato publico de feature fica em `:feature:*:api`.
+- Implementacao privada de feature fica em `:feature:*:impl`.
+- Dentro do `impl`, regra, dados e tela continuam separados por package.
 - Testes seguem o padrao Given, When, Then.
