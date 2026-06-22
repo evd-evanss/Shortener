@@ -39,7 +39,7 @@ private fun ShortenerNavigation() {
     val features = listOf<Feature>(
         SplashFeature(
             onFinished = {
-                replace(ShortenerKey)
+                setRoot(ShortenerKey)
             },
         ),
         ShareFeature,
@@ -71,7 +71,7 @@ private class BackStackNavigator(
         backStack.add(key)
     }
 
-    override fun replace(key: AppNavKey) {
+    override fun setRoot(key: AppNavKey) {
         backStack.clear()
         backStack.add(key)
     }

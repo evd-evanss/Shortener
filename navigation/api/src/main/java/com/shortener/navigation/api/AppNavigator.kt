@@ -16,7 +16,7 @@ interface AppNavigator {
     /**
      * Limpa o back stack atual e inicia novamente a partir de [key].
      */
-    fun replace(key: AppNavKey)
+    fun setRoot(key: AppNavKey)
 
     /**
      * Remove a tela atual quando existe uma tela anterior para voltar.
