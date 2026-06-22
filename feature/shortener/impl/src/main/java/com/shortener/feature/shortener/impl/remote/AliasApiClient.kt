@@ -8,8 +8,8 @@ import com.shortener.observability.logging.logger.AppLogger
 class AliasApiClient(
     private val networkClient: NetworkClient,
     private val logger: AppLogger,
-) : AliasRemoteDataSource {
-    override suspend fun shorten(url: String): AliasResponse {
+) {
+    suspend fun shorten(url: String): AliasResponse {
         logger.info(
             message = "Shortening URL through remote API",
             attributes = mapOf("path" to "/api/alias"),

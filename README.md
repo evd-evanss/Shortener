@@ -8,9 +8,10 @@ App Android simples para encurtar URLs.
 2. Ajusta para um formato valido, como `https://example.com`.
 3. Envia a URL para a API.
 4. Mostra o alias gerado na lista de links recentes.
-5. Permite copiar o link retornado pela API.
+5. Permite compartilhar o link retornado pela API.
 6. Permite abrir a URL original que ja veio na resposta.
-7. Mostra erro amigavel quando a URL e invalida ou quando a API falha.
+7. Permite copiar o link curto na tela de compartilhamento.
+8. Mostra erro amigavel quando a URL e invalida ou quando a API falha.
 
 A API usada para encurtar e:
 
@@ -65,13 +66,13 @@ Instalar no device conectado:
 Rodar os testes unitarios principais:
 
 ```bash
-./gradlew :observability:test :feature:shortener:impl:testDebugUnitTest
+./gradlew :core:observability:test :feature:shortener:impl:testDebugUnitTest
 ```
 
 Rodar a validacao principal:
 
 ```bash
-./gradlew :app:assembleDebug :observability:test :feature:shortener:impl:testDebugUnitTest :app:assembleDebugAndroidTest
+./gradlew :app:assembleDebug :core:observability:test :feature:shortener:impl:testDebugUnitTest :app:assembleDebugAndroidTest
 ```
 
 ### Sentry opcional
@@ -92,7 +93,7 @@ O app usa uma API publica hospedada no Render. Em alguns momentos ela pode demor
 
 ## Arquitetura
 
-O projeto usa Single Activity, Jetpack Compose, MVVM com `StateFlow`, Koin, Ktor e modulos separados por responsabilidade.
+O projeto usa Single Activity, Jetpack Compose, Navigation 3, MVVM com `StateFlow`, Koin, Ktor e modulos separados por responsabilidade.
 
 Na camada de apresentação, estou utilizando MVVM:
 
@@ -102,40 +103,194 @@ Na camada de apresentação, estou utilizando MVVM:
 - o estado da tela fica em um `ShortenerUiState`;
 - a tela observa esse estado e se redesenha.
 
+### Visao geral
+
+```mermaid
+flowchart TD
+    App[":app"]
+    NavApi[":navigation:api"]
+    Design[":core:designsystem"]
+    Network[":core:network"]
+    Logs[":core:observability"]
+    Splash[":feature:splash"]
+    ShortApi[":feature:shortener:api"]
+    ShortImpl[":feature:shortener:impl"]
+    ShareApi[":feature:share:api"]
+    ShareImpl[":feature:share:impl"]
+
+    App --> NavApi
+    App --> Splash
+    App --> ShortImpl
+    App --> ShareImpl
+
+    Splash --> NavApi
+    ShortImpl --> NavApi
+    ShortImpl --> ShortApi
+    ShortImpl --> ShareApi
+    ShortImpl --> Design
+    ShortImpl --> Network
+    ShortImpl --> Logs
+
+    ShareImpl --> NavApi
+    ShareImpl --> ShareApi
+    ShareImpl --> Design
+
+    Network --> Logs
+```
+
+A ideia é simples:
+
+- `:app` monta o aplicativo final.
+- `:core:*` concentra coisas reutilizaveis do app inteiro.
+- `:navigation:api` define o contrato de navegação.
+- `:feature:*:api` expõe contratos pequenos e estáveis.
+- `:feature:*:impl` guarda a implementação real da feature.
+
+### Modulos atuais
+
 ```text
 :app
-:navigation
-:designsystem
-:observability
-:network
+:core:designsystem
+:core:network
+:core:observability
+:navigation:api
 :feature:splash
+:feature:share:api
+:feature:share:impl
 :feature:shortener:api
 :feature:shortener:impl
 ```
 
 Hoje a divisao é:
 
-- modulos Android: `:app`, `:navigation`, `:designsystem`, `:feature:splash`, `:feature:shortener:impl`;
-- modulos Kotlin puros: `:observability`, `:network`, `:feature:shortener:api`.
+- modulos Android: `:app`, `:core:designsystem`, `:navigation:api`, `:feature:splash`, `:feature:share:api`, `:feature:share:impl`, `:feature:shortener:impl`;
+- modulos Kotlin puros: `:core:observability`, `:core:network`, `:feature:shortener:api`.
 
-Isso ajuda a manter contrato publico, implementacao, rede e tela separados.
+## Padrao API / Impl
 
-Na feature principal, estou usando o padrao API/Implementation:
+As features que podem ser consumidas por outras partes do app seguem o padrao `api` e `impl`.
 
-```text
-:app  -> :feature:shortener:impl
-:impl -> :feature:shortener:api
+```mermaid
+flowchart LR
+    Consumer["Modulo consumidor"]
+    Api[":feature:x:api"]
+    Impl[":feature:x:impl"]
+
+    Consumer --> Api
+    Impl --> Api
 ```
 
-O modulo `api` expoe apenas contrato e modelos publicos em Kotlin puro. O modulo `impl` guarda a tela, ViewModel, regra de negocio, repository e chamada de rede.
+O modulo `api` é o contrato. Ele deve ter pouca coisa:
 
-Dentro do `impl`, a organizacao continua separada:
+- interfaces que outros modulos podem usar;
+- modelos que atravessam a fronteira da feature;
+- keys de navegacao quando outra feature precisa abrir uma tela com parametros.
 
-```text
-presentation -> domain <- data
+O modulo `impl` é a implementacao privada. Ele pode ter:
+
+- telas em Compose;
+- ViewModel;
+- use cases;
+- repositories concretos;
+- clients remotos;
+- DI;
+- dependencias como Ktor, Koin, Compose e design system.
+
+Na pratica, isso evita que uma feature precise conhecer a tela, o ViewModel ou a chamada de rede de outra feature.
+
+### Exemplo no Shortener
+
+```mermaid
+flowchart TD
+    Screen["ShortenerScreen"]
+    VM["ShortenerViewModel"]
+    UseCase["ShortenUrlUseCase"]
+    RepoContract["UrlShortenerRepository<br/>:feature:shortener:api"]
+    RepoImpl["UrlShortenerRepositoryImpl"]
+    ApiClient["AliasApiClient"]
+    NetworkClient["NetworkClient<br/>:core:network"]
+    Api["API publica"]
+
+    Screen --> VM
+    VM --> UseCase
+    UseCase --> RepoContract
+    RepoImpl --> RepoContract
+    RepoImpl --> ApiClient
+    ApiClient --> NetworkClient
+    NetworkClient --> Api
 ```
 
-A tela depende do ViewModel, o ViewModel depende do use case, e o use case depende de uma abstracao de repository.
+O contrato `UrlShortenerRepository` fica no `:feature:shortener:api`.
+
+A implementacao concreta `UrlShortenerRepositoryImpl` fica no `:feature:shortener:impl`.
+
+Assim o use case fala com um contrato, mas a chamada real da API continua escondida no `impl`.
+
+## Navegacao entre modulos
+
+A navegacao usa Navigation 3, mas as features nao mexem diretamente no back stack. O back stack fica no `:app`.
+
+O modulo `:navigation:api` define tres pecas:
+
+```kotlin
+interface AppNavKey
+interface AppNavigator
+interface Feature
+```
+
+Cada feature registra as telas que sabe renderizar usando `FeatureEntry`.
+
+```mermaid
+flowchart TD
+    App[":app"]
+    BackStack["Navigation 3 back stack"]
+    NavDisplay["NavDisplay"]
+    FeatureList["Lista de Feature"]
+    SplashFeature["SplashFeature"]
+    ShortenerFeature["ShortenerFeature"]
+    ShareFeature["ShareFeature"]
+
+    App --> BackStack
+    App --> NavDisplay
+    App --> FeatureList
+    FeatureList --> SplashFeature
+    FeatureList --> ShortenerFeature
+    FeatureList --> ShareFeature
+    NavDisplay --> FeatureList
+```
+
+O `:app` faz quatro coisas:
+
+- cria o back stack com `rememberNavBackStack(SplashKey)`;
+- cria o `AppNavigator` concreto;
+- junta as features em uma lista;
+- entrega a key atual para a feature que sabe renderizar aquela tela.
+
+As features fazem duas coisas:
+
+- declaram suas proprias keys;
+- dizem qual tela deve ser renderizada para cada key.
+
+### Navegacao com parametros
+
+Quando a tela de links recentes chama `Compartilhar`, a feature de shortener navega usando uma key publica da feature de share:
+
+```mermaid
+sequenceDiagram
+    participant Shortener as ShortenerFeature
+    participant Navigator as AppNavigator
+    participant App as App back stack
+    participant Share as ShareFeature
+
+    Shortener->>Navigator: navigate(ShareLinkKey(alias, shortUrl, originalUrl))
+    Navigator->>App: adiciona key no back stack
+    App->>Share: encontra FeatureEntry de ShareLinkKey
+    Share-->>App: renderiza ShareRoute
+```
+
+O ponto importante: `:feature:shortener:impl` depende de `:feature:share:api`, não de `:feature:share:impl`.
+
+Isso permite chamar a tela de compartilhamento sem conhecer a implementacao dela.
 
 ## Modulos
 
@@ -149,23 +304,20 @@ Responsável por:
 - aplicar o tema;
 - iniciar o Koin;
 - configurar o Sentry quando existir DSN;
-- chamar o `AppNavHost`.
+- manter o back stack do Navigation 3;
+- renderizar as telas com `NavDisplay`;
+- orquestrar a troca entre features.
 
-### `:navigation`
+### `:navigation:api`
 
-Grafo de navegação do app.
+Contrato de navegacao usado entre `:app` e features.
 
-Responsável por:
+Aqui ficam:
 
-- definir as rotas principais;
-- iniciar pela splash;
-- navegar da splash para o encurtador;
-- receber o conteudo da feature por parametro, sem depender da implementacao dela.
-
-Hoje ele registra:
-
-- `splash`;
-- `shortener`.
+- interface `AppNavKey`;
+- interface `AppNavigator`;
+- interface `Feature`;
+- nenhum detalhe de tela, ViewModel, rede ou regra de negocio.
 
 ### `:feature:splash`
 
@@ -174,6 +326,8 @@ Feature da splash.
 Aqui ficam:
 
 - tela de abertura;
+- key de navegacao `SplashKey`;
+- feature de navegacao `SplashFeature`;
 - textos da splash;
 - tempo de exibicao;
 - callback para avisar que a navegacao pode continuar.
@@ -187,9 +341,31 @@ Aqui ficam:
 - interface publica `Shortener`;
 - resultado publico `ShortenUrlResult`;
 - modelos publicos `ShortenedUrl` e `ShortenerError`;
-- nenhum detalhe de Compose, Android, Ktor, repository, ViewModel ou regra interna.
+- contrato `UrlShortenerRepository`, usado pela implementacao da feature;
+- nenhum detalhe de Compose, Android, Ktor, ViewModel ou regra interna.
 
 Esse modulo deve continuar leve e estavel. Ele nao tem Manifest, resources, Compose ou dependencia Android.
+
+### `:feature:share:api`
+
+Contrato publico da feature de compartilhamento.
+
+Aqui ficam:
+
+- key parametrizada `ShareLinkKey`;
+- dados necessarios para compartilhar um link: alias, URL curta e URL original;
+- nenhum detalhe de tela, intent Android ou design system.
+
+### `:feature:share:impl`
+
+Implementacao privada da feature de compartilhamento.
+
+Aqui ficam:
+
+- tela em Compose para revisar o link antes de compartilhar;
+- acao para copiar a URL curta;
+- acao para abrir o share sheet nativo do Android;
+- feature de navegacao `ShareFeature`.
 
 ### `:feature:shortener:impl`
 
@@ -203,22 +379,25 @@ Aqui ficam:
 - mensagens que aparecem para o usuario;
 - use case de encurtamento;
 - regras de validacao e normalizacao da URL;
-- repository;
-- remoto da API;
+- implementacao concreta do repository;
+- client remoto da API;
+- key de navegacao `ShortenerKey`;
+- navegacao para `ShareLinkKey` usando apenas o contrato publico de `:feature:share:api`;
+- registrador de navegacao da feature;
 - DI interno da feature.
 
-Outros modulos que precisarem da capacidade de encurtar URL devem enxergar apenas o contrato do `:feature:shortener:api`. A tela concreta fica no `impl` e é conectada pelo `:app`.
+Outros modulos que precisarem da capacidade de encurtar URL devem enxergar apenas o contrato do `:feature:shortener:api`. A tela concreta e a entrada de navegacao ficam no `impl`.
 
 Dentro do `impl`, a feature continua organizada em partes menores:
 
 ```text
 ui: tela, estado e ViewModel
 usecase: regra de encurtamento
-repository: contrato privado e implementacao dos dados
-remote: chamada da API
+repository: implementacao que transforma resposta remota em modelo do app
+remote: request, response e chamada HTTP da API
 ```
 
-### `:network`
+### `:core:network`
 
 Configuração de rede.
 
@@ -232,7 +411,7 @@ Centraliza:
 - logs completos de request e response;
 - erros de rede.
 
-### `:designsystem`
+### `:core:designsystem`
 
 Componentes visuais reutilizaveis.
 
@@ -243,7 +422,7 @@ Aqui ficam:
 - tipografia;
 - componentes;
 
-### `:observability`
+### `:core:observability`
 
 Logs e provedores de observabilidade.
 
@@ -283,14 +462,14 @@ Quando entra:
 
 ```text
 App
-  -> Navigation
+  -> NavDisplay
   -> Splash
   -> Shortener
       -> Screen
       -> ViewModel
       -> UseCase
       -> Repository
-      -> RemoteDataSource
+      -> AliasApiClient
       -> Network
       -> API
 ```
@@ -314,7 +493,7 @@ URL invalida
 ## Bibliotecas utilizadas nesse app
 
 - Jetpack Compose: telas.
-- Navigation Compose: navegacao entre features.
+- Navigation 3: back stack e renderizacao das telas.
 - Material 3: base visual.
 - Koin: injecao de dependencias e ViewModel.
 - Ktor: chamadas HTTP.
@@ -351,7 +530,7 @@ Se o DSN estiver vazio, o app nao inicia o Sentry.
 Arquivo:
 
 ```text
-observability/src/test/java/.../CompositeAppLoggerTest.kt
+core/observability/src/test/java/.../CompositeAppLoggerTest.kt
 ```
 
 Cobre:
@@ -363,7 +542,7 @@ Cobre:
 Rodar:
 
 ```bash
-./gradlew :observability:test
+./gradlew :core:observability:test
 ```
 
 ### Unitarios da regra de negocio
@@ -504,13 +683,13 @@ Gerar o app:
 Rodar todos os testes unitarios atuais:
 
 ```bash
-./gradlew :observability:test :feature:shortener:impl:testDebugUnitTest
+./gradlew :core:observability:test :feature:shortener:impl:testDebugUnitTest
 ```
 
 Rodar validacao principal:
 
 ```bash
-./gradlew :app:assembleDebug :observability:test :feature:shortener:impl:testDebugUnitTest :app:assembleDebugAndroidTest
+./gradlew :app:assembleDebug :core:observability:test :feature:shortener:impl:testDebugUnitTest :app:assembleDebugAndroidTest
 ```
 
 Rodar lint:
@@ -523,10 +702,12 @@ Rodar lint:
 
 - Texto visivel para o usuario fica em `strings.xml`.
 - Texto tecnico de log pode ficar no codigo.
-- Componentes visuais compartilhados ficam no `:designsystem`.
-- Configuracao de rede fica no `:network`.
-- Logs e Sentry ficam no `:observability`.
-- Navegacao principal fica no `:navigation`.
+- Componentes visuais compartilhados ficam no `:core:designsystem`.
+- Configuracao de rede fica no `:core:network`.
+- Logs e Sentry ficam no `:core:observability`.
+- Contrato de navegacao fica no `:navigation:api`.
+- Cada feature declara as proprias keys de navegacao.
+- O `:app` mantem o back stack e orquestra fluxo entre features.
 - Contrato publico de feature fica em `:feature:*:api`.
 - Implementacao privada de feature fica em `:feature:*:impl`.
 - Dentro do `impl`, regra, dados e tela continuam separados por package.

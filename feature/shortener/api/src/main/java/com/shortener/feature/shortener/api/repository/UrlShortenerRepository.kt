@@ -1,4 +1,4 @@
-package com.shortener.feature.shortener.impl.repository
+package com.shortener.feature.shortener.api.repository
 
 import com.shortener.feature.shortener.api.model.ShortenedUrl
 

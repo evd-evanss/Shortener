@@ -1,6 +1,5 @@
 package com.shortener.feature.shortener.impl.ui.screen
 
-import android.content.ClipData
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,11 +17,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ClipEntry
-import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -43,7 +39,6 @@ import com.shortener.feature.shortener.impl.R
 import com.shortener.feature.shortener.impl.ui.screen.states.ShortenerMessage
 import com.shortener.feature.shortener.impl.ui.screen.states.ShortenerUiState
 import com.shortener.feature.shortener.impl.ui.screen.states.UiMessage
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun ShortenerScreen(
@@ -51,6 +46,7 @@ internal fun ShortenerScreen(
     onUrlChanged: (String) -> Unit,
     onShortenClick: () -> Unit,
     onOpenClick: (ShortenedUrl) -> Unit,
+    onShareClick: (ShortenedUrl) -> Unit,
     onMessageShown: () -> Unit,
     onUrlOpened: () -> Unit,
 ) {
@@ -142,6 +138,7 @@ internal fun ShortenerScreen(
                         HistoryItem(
                             item = item,
                             onOpenClick = onOpenClick,
+                            onShareClick = onShareClick,
                         )
                     }
                 }
@@ -154,11 +151,8 @@ internal fun ShortenerScreen(
 private fun HistoryItem(
     item: ShortenedUrl,
     onOpenClick: (ShortenedUrl) -> Unit,
+    onShareClick: (ShortenedUrl) -> Unit,
 ) {
-    val clipboard = LocalClipboard.current
-    val coroutineScope = rememberCoroutineScope()
-    val copyLabel = stringResource(R.string.shortener_copy_action)
-
     AppInfoCard {
         Row(verticalAlignment = Alignment.CenterVertically) {
             AppText(
@@ -206,17 +200,11 @@ private fun HistoryItem(
         ) {
             TextButton(
                 onClick = {
-                    coroutineScope.launch {
-                        clipboard.setClipEntry(
-                            ClipEntry(
-                                ClipData.newPlainText(copyLabel, item.shortUrl),
-                            ),
-                        )
-                    }
+                    onShareClick(item)
                 },
             ) {
                 AppText(
-                    text = stringResource(R.string.shortener_copy_action),
+                    text = stringResource(R.string.shortener_share_action),
                     style = AppTextStyle.Action
                 )
             }
@@ -252,6 +240,7 @@ private fun ShortenerScreenPreview() {
             onUrlChanged = {},
             onMessageShown = {},
             onOpenClick = {},
+            onShareClick = {},
             onUrlOpened = {},
         )
     }

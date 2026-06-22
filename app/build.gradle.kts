@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 val localProperties = Properties().apply {
@@ -36,17 +37,22 @@ android {
 }
 
 dependencies {
-    implementation(project(":designsystem"))
-    implementation(project(":navigation"))
-    implementation(project(":observability"))
-    implementation(project(":network"))
+    implementation(project(":core:designsystem"))
+    implementation(project(":core:observability"))
+    implementation(project(":core:network"))
+    implementation(project(":navigation:api"))
+    implementation(project(":feature:splash"))
+    implementation(project(":feature:share:impl"))
     implementation(project(":feature:shortener:impl"))
 
     implementation("androidx.activity:activity-compose:1.12.0")
     implementation("androidx.compose.material3:material3:1.5.0-alpha17")
     implementation("androidx.compose.ui:ui:1.11.1")
+    implementation("androidx.navigation3:navigation3-runtime:1.1.3")
+    implementation("androidx.navigation3:navigation3-ui:1.1.3")
     implementation("io.insert-koin:koin-android:4.1.1")
     implementation("io.sentry:sentry-android:8.43.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.10.0")
 
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test:runner:1.7.0")

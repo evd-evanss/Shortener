@@ -14,7 +14,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":observability"))
+    implementation(project(":core:observability"))
     implementation("io.ktor:ktor-client-core:3.5.0")
     implementation("io.ktor:ktor-client-content-negotiation:3.5.0")
     implementation("io.ktor:ktor-client-logging:3.5.0")

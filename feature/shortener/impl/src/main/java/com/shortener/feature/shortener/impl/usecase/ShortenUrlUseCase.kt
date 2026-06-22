@@ -3,7 +3,7 @@ package com.shortener.feature.shortener.impl.usecase
 import com.shortener.feature.shortener.api.Shortener
 import com.shortener.feature.shortener.api.ShortenUrlResult
 import com.shortener.feature.shortener.api.model.ShortenerError
-import com.shortener.feature.shortener.impl.repository.UrlShortenerRepository
+import com.shortener.feature.shortener.api.repository.UrlShortenerRepository
 
 class ShortenUrlUseCase(
     private val repository: UrlShortenerRepository,
