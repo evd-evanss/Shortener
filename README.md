@@ -215,15 +215,46 @@ Voce so precisa saber que existe "hamburguer com batata" no cardapio. Voce nao p
 
 Na pratica, isso evita que uma feature precise conhecer a tela, o ViewModel ou a chamada de rede de outra feature.
 
-### Exemplo no Shortener
+### Exemplo de API / Impl no Shortener
+
+```mermaid
+flowchart LR
+    Consumer["Outro modulo"]
+    Api[":feature:shortener:api<br/>cardapio / contrato publico"]
+    Impl[":feature:shortener:impl<br/>cozinha / implementacao privada"]
+
+    Consumer -->|"pede para encurtar uma URL"| Api
+    Impl -->|"realiza o contrato"| Api
+```
+
+No `:feature:shortener:api` ficam as coisas que outros modulos podem conhecer:
+
+- `Shortener`;
+- `ShortenUrlResult`;
+- `ShortenedUrl`;
+- `ShortenerError`;
+- `UrlShortenerRepository`.
+
+No `:feature:shortener:impl` fica como isso funciona por dentro:
+
+- tela;
+- ViewModel;
+- use case;
+- implementacao concreta do repository;
+- client da API;
+- DI.
+
+### Fluxo interno do Shortener
+
+Depois que estamos dentro do `impl`, o fluxo segue a separacao normal da feature:
 
 ```mermaid
 flowchart TD
     Screen["ShortenerScreen"]
     VM["ShortenerViewModel"]
     UseCase["ShortenUrlUseCase"]
-    RepoContract["UrlShortenerRepository<br/>:feature:shortener:api"]
-    RepoImpl["UrlShortenerRepositoryImpl"]
+    RepoContract["UrlShortenerRepository<br/>contrato em :feature:shortener:api"]
+    RepoImpl["UrlShortenerRepositoryImpl<br/>implementacao em :feature:shortener:impl"]
     ApiClient["AliasApiClient"]
     NetworkClient["NetworkClient<br/>:core:network"]
     Api["API publica"]
@@ -231,17 +262,15 @@ flowchart TD
     Screen --> VM
     VM --> UseCase
     UseCase --> RepoContract
-    RepoImpl --> RepoContract
+    RepoContract -. "implementado por" .-> RepoImpl
     RepoImpl --> ApiClient
     ApiClient --> NetworkClient
     NetworkClient --> Api
 ```
 
-O contrato `UrlShortenerRepository` fica no `:feature:shortener:api`.
+O use case fala com o contrato `UrlShortenerRepository`.
 
-A implementacao concreta `UrlShortenerRepositoryImpl` fica no `:feature:shortener:impl`.
-
-Assim o use case fala com um contrato, mas a chamada real da API continua escondida no `impl`.
+A implementacao concreta `UrlShortenerRepositoryImpl` realiza esse contrato e usa `AliasApiClient` para chamar a API.
 
 ## Navegacao entre modulos
 
