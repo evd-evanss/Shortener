@@ -1,0 +1,16 @@
+<resources>
+    <string name="share_title">Compartilhar link</string>
+    <string name="share_subtitle">Revise o link encurtado antes de enviar para outra pessoa.</string>
+    <string name="share_back_action">Voltar</string>
+    <string name="share_alias_label">Alias</string>
+    <string name="share_short_url_label">URL encurtada</string>
+    <string name="share_original_url_label">URL original</string>
+    <string name="share_copy_action">Copiar</string>
+    <string name="share_send_action">Compartilhar</string>
+    <string name="share_copy_label">Link encurtado</string>
+    <string name="share_chooser_title">Compartilhar link</string>
+    <string name="share_message">Link encurtado: %1$s\nURL original: %2$s</string>
+    <string name="share_preview_alias">abc123</string>
+    <string name="share_preview_short_url">https://shortener.example/abc123</string>
+    <string name="share_preview_original_url">https://www.example.com</string>
+</resources>

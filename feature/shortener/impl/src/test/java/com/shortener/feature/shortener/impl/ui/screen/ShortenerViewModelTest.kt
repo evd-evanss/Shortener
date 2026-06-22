@@ -2,7 +2,7 @@ package com.shortener.feature.shortener.impl.ui.screen
 
 import app.cash.turbine.test
 import com.shortener.feature.shortener.api.model.ShortenedUrl
-import com.shortener.feature.shortener.impl.repository.UrlShortenerRepository
+import com.shortener.feature.shortener.api.repository.UrlShortenerRepository
 import com.shortener.feature.shortener.impl.usecase.ShortenUrlUseCase
 import com.shortener.feature.shortener.impl.ui.screen.states.ShortenerMessage
 import com.shortener.observability.logging.logger.AppLogger

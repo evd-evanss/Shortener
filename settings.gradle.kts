@@ -16,10 +16,12 @@ dependencyResolutionManagement {
 
 rootProject.name = "Shortener"
 include(":app")
-include(":navigation")
-include(":observability")
-include(":network")
-include(":designsystem")
+include(":core:observability")
+include(":core:network")
+include(":core:designsystem")
+include(":navigation:api")
 include(":feature:splash")
+include(":feature:share:api")
+include(":feature:share:impl")
 include(":feature:shortener:api")
 include(":feature:shortener:impl")

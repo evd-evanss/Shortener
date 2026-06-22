@@ -9,10 +9,19 @@
     <string name="shortener_original_url_label">URL original</string>
     <string name="shortener_copy_action">Copiar</string>
     <string name="shortener_open_action">Abrir URL</string>
+    <string name="shortener_details_action">Detalhes</string>
+    <string name="shortener_share_action">Compartilhar</string>
+    <string name="shortener_details_back_action">Voltar</string>
+    <string name="shortener_details_title">Detalhes do link</string>
+    <string name="shortener_details_subtitle">Veja as informações do link encurtado e escolha o que fazer.</string>
+    <string name="shortener_details_alias_label">Alias</string>
+    <string name="shortener_details_open_original_action">Abrir original</string>
     <string name="shortener_success_message">Link encurtado com sucesso.</string>
     <string name="shortener_blank_url_message">Digite uma URL para encurtar.</string>
     <string name="shortener_invalid_url_message">URL inválida. Tente algo como example.com.</string>
     <string name="shortener_service_unavailable_message">Não foi possível encurtar agora. Verifique sua conexão ou tente novamente em instantes.</string>
     <string name="shortener_unknown_error_message">Não foi possível encurtar a URL agora. Tente novamente.</string>
     <string name="shortener_preview_url">https://www.example.com</string>
+    <string name="shortener_details_preview_alias">abc123</string>
+    <string name="shortener_details_preview_short_url">https://shortener.example/abc123</string>
 </resources>

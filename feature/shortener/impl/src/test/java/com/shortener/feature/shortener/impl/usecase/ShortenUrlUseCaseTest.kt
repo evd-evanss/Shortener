@@ -3,7 +3,7 @@ package com.shortener.feature.shortener.impl.usecase
 import com.shortener.feature.shortener.api.model.ShortenerError
 import com.shortener.feature.shortener.api.model.ShortenedUrl
 import com.shortener.feature.shortener.api.ShortenUrlResult
-import com.shortener.feature.shortener.impl.repository.UrlShortenerRepository
+import com.shortener.feature.shortener.api.repository.UrlShortenerRepository
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

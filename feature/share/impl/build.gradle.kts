@@ -1,11 +1,10 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
-    namespace = "com.shortener.feature.splash"
+    namespace = "com.shortener.feature.share.impl"
     compileSdk = 37
 
     defaultConfig {
@@ -14,14 +13,13 @@ android {
 }
 
 dependencies {
+    implementation(project(":feature:share:api"))
     implementation(project(":core:designsystem"))
     implementation(project(":navigation:api"))
-    implementation("androidx.compose.animation:animation-core:1.11.1")
     implementation("androidx.compose.foundation:foundation:1.11.1")
     implementation("androidx.compose.material3:material3:1.5.0-alpha17")
     implementation("androidx.compose.runtime:runtime:1.11.1")
     implementation("androidx.compose.ui:ui:1.11.1")
     implementation("androidx.compose.ui:ui-tooling-preview:1.11.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.10.0")
     debugImplementation("androidx.compose.ui:ui-tooling:1.11.1")
 }

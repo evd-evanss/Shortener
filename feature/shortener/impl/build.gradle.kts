@@ -26,9 +26,11 @@ kotlin {
 
 dependencies {
     implementation(project(":feature:shortener:api"))
-    implementation(project(":designsystem"))
-    implementation(project(":observability"))
-    implementation(project(":network"))
+    implementation(project(":feature:share:api"))
+    implementation(project(":core:designsystem"))
+    implementation(project(":core:observability"))
+    implementation(project(":core:network"))
+    implementation(project(":navigation:api"))
     implementation("androidx.activity:activity-compose:1.12.0")
     implementation("androidx.compose.foundation:foundation:1.11.1")
     implementation("androidx.compose.material3:material3:1.5.0-alpha17")
