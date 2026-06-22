@@ -28,7 +28,7 @@ dependencies {
     implementation(project(":feature:shortener:api"))
     implementation(project(":feature:share:api"))
     implementation(project(":core:designsystem"))
-    implementation(project(":core:observability"))
+    implementation(project(":core:observability:api"))
     implementation(project(":core:network"))
     implementation(project(":navigation:api"))
     implementation("androidx.activity:activity-compose:1.12.0")

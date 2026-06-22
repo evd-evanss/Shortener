@@ -16,7 +16,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "Shortener"
 include(":app")
-include(":core:observability")
+include(":core:observability:api")
+include(":core:observability:impl")
 include(":core:network")
 include(":core:designsystem")
 include(":navigation:api")

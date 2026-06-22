@@ -66,13 +66,13 @@ Instalar no device conectado:
 Rodar os testes unitarios principais:
 
 ```bash
-./gradlew :core:observability:test :feature:shortener:impl:testDebugUnitTest
+./gradlew :core:observability:impl:test :feature:shortener:impl:testDebugUnitTest
 ```
 
 Rodar a validacao principal:
 
 ```bash
-./gradlew :app:assembleDebug :core:observability:test :feature:shortener:impl:testDebugUnitTest :app:assembleDebugAndroidTest
+./gradlew :app:assembleDebug :core:observability:impl:test :feature:shortener:impl:testDebugUnitTest :app:assembleDebugAndroidTest
 ```
 
 ### Sentry opcional
@@ -111,7 +111,8 @@ flowchart TD
     NavApi[":navigation:api"]
     Design[":core:designsystem"]
     Network[":core:network"]
-    Logs[":core:observability"]
+    LogsApi[":core:observability:api"]
+    LogsImpl[":core:observability:impl"]
     Splash[":feature:splash"]
     ShortApi[":feature:shortener:api"]
     ShortImpl[":feature:shortener:impl"]
@@ -122,6 +123,7 @@ flowchart TD
     App --> Splash
     App --> ShortImpl
     App --> ShareImpl
+    App --> LogsImpl
 
     Splash --> NavApi
     ShortImpl --> NavApi
@@ -129,13 +131,14 @@ flowchart TD
     ShortImpl --> ShareApi
     ShortImpl --> Design
     ShortImpl --> Network
-    ShortImpl --> Logs
+    ShortImpl --> LogsApi
 
     ShareImpl --> NavApi
     ShareImpl --> ShareApi
     ShareImpl --> Design
 
-    Network --> Logs
+    Network --> LogsApi
+    LogsImpl --> LogsApi
 ```
 
 A ideia é simples:
@@ -152,7 +155,8 @@ A ideia é simples:
 :app
 :core:designsystem
 :core:network
-:core:observability
+:core:observability:api
+:core:observability:impl
 :navigation:api
 :feature:splash
 :feature:share:api
@@ -164,7 +168,7 @@ A ideia é simples:
 Hoje a divisao é:
 
 - modulos Android: `:app`, `:core:designsystem`, `:navigation:api`, `:feature:splash`, `:feature:share:api`, `:feature:share:impl`, `:feature:shortener:impl`;
-- modulos Kotlin puros: `:core:observability`, `:core:network`, `:feature:shortener:api`.
+- modulos Kotlin puros: `:core:observability:api`, `:core:observability:impl`, `:core:network`, `:feature:shortener:api`.
 
 ## Padrao API / Impl
 
@@ -464,13 +468,17 @@ Aqui ficam:
 - tipografia;
 - componentes;
 
-### `:core:observability`
+### `:core:observability:api` e `:core:observability:impl`
 
 Logs e provedores de observabilidade.
 
-O app usa `AppLogger` nas features. Esse contrato não conhece Sentry, Datadog ou New Relic.
+O `:core:observability:api` é a porta publica. Ele expõe apenas o `AppLogger`, que é o que outros modulos podem pedir quando precisam registrar logs.
 
-Dentro do modulo, o log vira um `LogEvent` com:
+O `:core:observability:impl` é a implementacao privada. Nele ficam Koin, Sentry e a logica real de envio dos logs.
+
+As features e o modulo de rede dependem só da API. Assim eles não conhecem Sentry, Datadog ou New Relic.
+
+Dentro do `impl`, o log vira um `LogEvent` com:
 
 - nivel;
 - mensagem;
@@ -484,7 +492,7 @@ Hoje existem:
 - `ConsoleReport`: escreve logs no console com a tag `AppLogs`;
 - `SentryReport`: envia breadcrumbs e erros para o Sentry.
 
-Se amanha precisarmos trocar ou adicionar New Relic/Datadog, a ideia é criar outro report de log e trocar a configuracão no Koin:
+Se amanha precisarmos trocar ou adicionar New Relic/Datadog, a ideia é mexer principalmente no `impl`: criar outro report de log e trocar a configuracão no Koin. O contrato `AppLogger` continua estavel para o resto do app.
 
 ```kotlin
 CompositeAppLogger(
@@ -572,7 +580,7 @@ Se o DSN estiver vazio, o app nao inicia o Sentry.
 Arquivo:
 
 ```text
-core/observability/src/test/java/.../CompositeAppLoggerTest.kt
+core/observability/impl/src/test/java/.../CompositeAppLoggerTest.kt
 ```
 
 Cobre:
@@ -584,7 +592,7 @@ Cobre:
 Rodar:
 
 ```bash
-./gradlew :core:observability:test
+./gradlew :core:observability:impl:test
 ```
 
 ### Unitarios da regra de negocio
@@ -725,13 +733,13 @@ Gerar o app:
 Rodar todos os testes unitarios atuais:
 
 ```bash
-./gradlew :core:observability:test :feature:shortener:impl:testDebugUnitTest
+./gradlew :core:observability:impl:test :feature:shortener:impl:testDebugUnitTest
 ```
 
 Rodar validacao principal:
 
 ```bash
-./gradlew :app:assembleDebug :core:observability:test :feature:shortener:impl:testDebugUnitTest :app:assembleDebugAndroidTest
+./gradlew :app:assembleDebug :core:observability:impl:test :feature:shortener:impl:testDebugUnitTest :app:assembleDebugAndroidTest
 ```
 
 Rodar lint:
@@ -746,7 +754,8 @@ Rodar lint:
 - Texto tecnico de log pode ficar no codigo.
 - Componentes visuais compartilhados ficam no `:core:designsystem`.
 - Configuracao de rede fica no `:core:network`.
-- Logs e Sentry ficam no `:core:observability`.
+- Contrato publico de logs fica no `:core:observability:api`.
+- Implementacao de logs e Sentry ficam no `:core:observability:impl`.
 - Contrato de navegacao fica no `:navigation:api`.
 - Cada feature declara as proprias keys de navegacao.
 - O `:app` mantem o back stack e orquestra fluxo entre features.
