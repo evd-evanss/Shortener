@@ -196,6 +196,23 @@ O modulo `impl` é a implementacao privada. Ele pode ter:
 - DI;
 - dependencias como Ktor, Koin, Compose e design system.
 
+Um jeito simples de pensar:
+
+```text
+api = o que posso pedir
+impl = como isso é feito
+```
+
+Exemplo do dia a dia:
+
+```text
+Restaurante
+api: o cardapio.
+impl: a cozinha.
+```
+
+Voce so precisa saber que existe "hamburguer com batata" no cardapio. Voce nao precisa saber qual panela usam, quem corta a batata ou como organizam a cozinha.
+
 Na pratica, isso evita que uma feature precise conhecer a tela, o ViewModel ou a chamada de rede de outra feature.
 
 ### Exemplo no Shortener
