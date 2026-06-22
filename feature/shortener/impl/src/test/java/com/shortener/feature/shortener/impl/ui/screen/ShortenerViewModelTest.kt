@@ -2,7 +2,6 @@ package com.shortener.feature.shortener.impl.ui.screen
 
 import app.cash.turbine.test
 import com.shortener.feature.shortener.api.model.ShortenedUrl
-import com.shortener.feature.shortener.api.repository.UrlShortenerRepository
 import com.shortener.feature.shortener.impl.usecase.ShortenUrlUseCase
 import com.shortener.feature.shortener.impl.ui.screen.states.ShortenerMessage
 import com.shortener.observability.logging.logger.AppLogger
@@ -142,7 +141,7 @@ class ShortenerViewModelTest {
         repository: FakeRepository = FakeRepository(),
     ): ShortenerViewModel {
         return ShortenerViewModel(
-            shortener = ShortenUrlUseCase(repository),
+            shortener = ShortenUrlUseCase(repository::shorten),
             logger = FakeLogger(),
         )
     }
@@ -163,10 +162,10 @@ class MainDispatcherRule(
 
 private class FakeRepository(
     private val shouldFail: Boolean = false,
-) : UrlShortenerRepository {
+) {
     val shortenedRequests = mutableListOf<String>()
 
-    override suspend fun shorten(url: String): Result<ShortenedUrl> {
+    suspend fun shorten(url: String): Result<ShortenedUrl> {
         shortenedRequests += url
 
         if (shouldFail) {

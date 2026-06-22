@@ -232,8 +232,7 @@ No `:feature:shortener:api` ficam as coisas que outros modulos podem conhecer:
 - `Shortener`;
 - `ShortenUrlResult`;
 - `ShortenedUrl`;
-- `ShortenerError`;
-- `UrlShortenerRepository`.
+- `ShortenerError`.
 
 No `:feature:shortener:impl` fica como isso funciona por dentro:
 
@@ -253,7 +252,6 @@ flowchart TD
     Screen["ShortenerScreen"]
     VM["ShortenerViewModel"]
     UseCase["ShortenUrlUseCase"]
-    RepoContract["UrlShortenerRepository<br/>contrato em :feature:shortener:api"]
     RepoImpl["UrlShortenerRepositoryImpl<br/>implementacao em :feature:shortener:impl"]
     ApiClient["AliasApiClient"]
     NetworkClient["NetworkClient<br/>:core:network"]
@@ -261,16 +259,15 @@ flowchart TD
 
     Screen --> VM
     VM --> UseCase
-    UseCase --> RepoContract
-    RepoContract -. "implementado por" .-> RepoImpl
+    UseCase --> RepoImpl
     RepoImpl --> ApiClient
     ApiClient --> NetworkClient
     NetworkClient --> Api
 ```
 
-O use case fala com o contrato `UrlShortenerRepository`.
+O use case chama a capacidade de encurtar que o `impl` injeta nele.
 
-A implementacao concreta `UrlShortenerRepositoryImpl` realiza esse contrato e usa `AliasApiClient` para chamar a API.
+A implementacao concreta `UrlShortenerRepositoryImpl` fica dentro do `impl` e usa `AliasApiClient` para chamar a API.
 
 ## Navegacao entre modulos
 
@@ -387,7 +384,6 @@ Aqui ficam:
 - interface publica `Shortener`;
 - resultado publico `ShortenUrlResult`;
 - modelos publicos `ShortenedUrl` e `ShortenerError`;
-- contrato `UrlShortenerRepository`, usado pela implementacao da feature;
 - nenhum detalhe de Compose, Android, Ktor, ViewModel ou regra interna.
 
 Esse modulo deve continuar leve e estavel. Ele nao tem Manifest, resources, Compose ou dependencia Android.

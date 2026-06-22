@@ -2,11 +2,11 @@ package com.shortener.feature.shortener.impl.usecase
 
 import com.shortener.feature.shortener.api.Shortener
 import com.shortener.feature.shortener.api.ShortenUrlResult
+import com.shortener.feature.shortener.api.model.ShortenedUrl
 import com.shortener.feature.shortener.api.model.ShortenerError
-import com.shortener.feature.shortener.api.repository.UrlShortenerRepository
 
 class ShortenUrlUseCase(
-    private val repository: UrlShortenerRepository,
+    private val shortenUrl: suspend (String) -> Result<ShortenedUrl>,
 ) : Shortener {
     override suspend fun shorten(rawUrl: String): ShortenUrlResult {
         val normalizedUrl = rawUrl.trim()
@@ -19,7 +19,7 @@ class ShortenUrlUseCase(
             return ShortenUrlResult.Error(ShortenerError.InvalidUrl)
         }
 
-        return repository.shorten(validUrl).fold(
+        return shortenUrl(validUrl).fold(
             onSuccess = { shortenedUrl ->
                 ShortenUrlResult.Success(shortenedUrl)
             },

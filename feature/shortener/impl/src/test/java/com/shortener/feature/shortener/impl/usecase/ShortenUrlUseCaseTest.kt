@@ -1,9 +1,8 @@
 package com.shortener.feature.shortener.impl.usecase
 
+import com.shortener.feature.shortener.api.ShortenUrlResult
 import com.shortener.feature.shortener.api.model.ShortenerError
 import com.shortener.feature.shortener.api.model.ShortenedUrl
-import com.shortener.feature.shortener.api.ShortenUrlResult
-import com.shortener.feature.shortener.api.repository.UrlShortenerRepository
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -11,10 +10,10 @@ import org.junit.Test
 
 class ShortenUrlUseCaseTest {
     @Test
-    fun `given url without scheme when shorten then sends normalized url to repository`() = runBlocking {
+    fun `given url without scheme when shorten then sends normalized url to dependency`() = runBlocking {
         // Given
-        val repository = FakeRepository()
-        val useCase = ShortenUrlUseCase(repository)
+        val shortener = FakeShortener()
+        val useCase = ShortenUrlUseCase(shortener::shorten)
 
         // When
         val result = useCase.shorten("example.com")
@@ -23,13 +22,13 @@ class ShortenUrlUseCaseTest {
         assertTrue(result is ShortenUrlResult.Success)
         val value = (result as ShortenUrlResult.Success).value
         assertEquals("https://example.com", value.originalUrl)
-        assertEquals(listOf("https://example.com"), repository.shortenedRequests)
+        assertEquals(listOf("https://example.com"), shortener.shortenedRequests)
     }
 
     @Test
-    fun `given repository failure when shorten then returns service unavailable`() = runBlocking {
+    fun `given shorten dependency failure when shorten then returns service unavailable`() = runBlocking {
         // Given
-        val useCase = ShortenUrlUseCase(FakeRepository(shouldFail = true))
+        val useCase = ShortenUrlUseCase(FakeShortener(shouldFail = true)::shorten)
 
         // When
         val result = useCase.shorten("https://example.com")
@@ -42,23 +41,23 @@ class ShortenUrlUseCaseTest {
     @Test
     fun `given invalid url when shorten then rejects url and does not call repository`() = runBlocking {
         // Given
-        val repository = FakeRepository()
-        val useCase = ShortenUrlUseCase(repository)
+        val shortener = FakeShortener()
+        val useCase = ShortenUrlUseCase(shortener::shorten)
 
         // When
         val result = useCase.shorten("just words")
 
         // Then
         assertTrue(result is ShortenUrlResult.Error)
-        assertTrue(repository.shortenedRequests.isEmpty())
+        assertTrue(shortener.shortenedRequests.isEmpty())
     }
 
-    private class FakeRepository(
+    private class FakeShortener(
         private val shouldFail: Boolean = false,
-    ) : UrlShortenerRepository {
+    ) {
         val shortenedRequests = mutableListOf<String>()
 
-        override suspend fun shorten(url: String): Result<ShortenedUrl> {
+        suspend fun shorten(url: String): Result<ShortenedUrl> {
             shortenedRequests += url
 
             if (shouldFail) {

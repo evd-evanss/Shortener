@@ -14,5 +14,5 @@ appId: com.shortener
 - assertVisible: "Url encurtada"
 - assertVisible: "URL original"
 - assertVisible: "https://example.com"
-- assertVisible: "Copiar"
+- assertVisible: "Compartilhar"
 - assertVisible: "Abrir URL"
